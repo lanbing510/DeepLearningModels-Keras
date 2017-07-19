@@ -2,7 +2,7 @@
 """
 Author: lanbing510
 Environment: Keras2.0.5，Python2.7
-Model: AlexNet
+Model: VGGNet-19
 """
 
 from keras.layers import Conv2D, MaxPooling2D, ZeroPadding2D
@@ -45,40 +45,58 @@ def conv2D_lrn2d(x,filters,kernel_size,strides=(1,1),padding='same',data_format=
 
 def create_model():
     if DATA_FORMAT=='channels_first':
-        INP_SHAPE=(3,227,227)
+        INP_SHAPE=(3,224,224)
         img_input=Input(shape=INP_SHAPE)
         CONCAT_AXIS=1
     elif DATA_FORMAT=='channels_last':
-        INP_SHAPE=(227,227,3)
+        INP_SHAPE=(224,224,3)
         img_input=Input(shape=INP_SHAPE)
         CONCAT_AXIS=3
     else:
         raise Exception('Invalid Dim Ordering: '+str(DIM_ORDERING))
     
-    # Convolution Net Layer 1
-    x=conv2D_lrn2d(img_input,96,(11,11),4,padding='valid')
-    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+    # Convolution Net Layer 1~2
+    x=conv2D_lrn2d(img_input,64,(3,3),1,padding='same',lrn2d_norm=False)
+    x=conv2D_lrn2d(x,64,(3,3),1,padding='same',lrn2d_norm=False)
+    x=MaxPooling2D(pool_size=(2,2),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
     
-    # Convolution Net Layer 2
-    x=conv2D_lrn2d(x,256,(5,5),1,padding='same')
-    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+    # Convolution Net Layer 3~4
+    x=conv2D_lrn2d(x,128,(3,3),1,padding='same',lrn2d_norm=False)
+    x=conv2D_lrn2d(x,128,(3,3),1,padding='same',lrn2d_norm=False)
+    x=MaxPooling2D(pool_size=(2,2),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
 
-    # Convolution Net Layer 3~5
-    x=conv2D_lrn2d(x,384,(3,3),1,padding='same',lrn2d_norm=False)
-    x=conv2D_lrn2d(x,384,(3,3),1,padding='same',lrn2d_norm=False)
+    # Convolution Net Layer 5~8
     x=conv2D_lrn2d(x,256,(3,3),1,padding='same',lrn2d_norm=False)
-    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+    x=conv2D_lrn2d(x,256,(3,3),1,padding='same',lrn2d_norm=False)    
+    x=conv2D_lrn2d(x,256,(3,3),1,padding='same',lrn2d_norm=False)
+    x=conv2D_lrn2d(x,256,(3,3),1,padding='same',lrn2d_norm=False)
+    x=MaxPooling2D(pool_size=(2,2),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+
+    # Convolution Net Layer 9~12
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)    
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)
+    x=MaxPooling2D(pool_size=(2,2),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+
+    # Convolution Net Layer 13~16
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)    
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)
+    x=conv2D_lrn2d(x,512,(3,3),1,padding='same',lrn2d_norm=False)
+    x=MaxPooling2D(pool_size=(2,2),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
     
-    # Convolution Net Layer 6
+    
+    # Convolution Net Layer 17
     x=Flatten()(x)
     x=Dense(4096,activation='relu')(x)
     x=Dropout(DROPOUT)(x)
 
-    # Convolution Net Layer 7
+    # Convolution Net Layer 18
     x=Dense(4096,activation='relu')(x)
     x=Dropout(DROPOUT)(x)
     
-    # Convolution Net Layer 8
+    # Convolution Net Layer 19
     x=Dense(output_dim=NB_CLASS,activation='softmax')(x)
     
     return x,img_input,CONCAT_AXIS,INP_SHAPE,DATA_FORMAT
