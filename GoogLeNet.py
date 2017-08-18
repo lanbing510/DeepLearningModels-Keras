@@ -90,19 +90,19 @@ def create_model():
     x=conv2D_lrn2d(x,192,(3,3),1,padding='same',lrn2d_norm=True)
     x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
     
-    x=inception_module(x,params=[(64,),(96,128),(16,32),(32,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //3a
-    x=inception_module(x,params=[(128,),(128,192),(32,96),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //3b
+    x=inception_module(x,params=[(64,),(96,128),(16,32),(32,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #3a
+    x=inception_module(x,params=[(128,),(128,192),(32,96),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #3b
     x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
 
-    x=inception_module(x,params=[(192,),(96,208),(16,48),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //4a
-    x=inception_module(x,params=[(160,),(112,224),(24,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //4b
-    x=inception_module(x,params=[(128,),(128,256),(24,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //4c
-    x=inception_module(x,params=[(112,),(144,288),(32,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //4d
-    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //4e
+    x=inception_module(x,params=[(192,),(96,208),(16,48),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4a
+    x=inception_module(x,params=[(160,),(112,224),(24,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4b
+    x=inception_module(x,params=[(128,),(128,256),(24,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4c
+    x=inception_module(x,params=[(112,),(144,288),(32,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4d
+    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4e
     x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
 
-    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //5a
-    x=inception_module(x,params=[(384,),(192,384),(48,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) //5b
+    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #5a
+    x=inception_module(x,params=[(384,),(192,384),(48,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #5b
     x=AveragePooling2D(pool_size=(7,7),strides=1,padding='valid',data_format=DATA_FORMAT)(x)
 
     x=Flatten()(x)
