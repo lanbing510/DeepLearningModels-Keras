@@ -45,7 +45,7 @@ def conv2D_lrn2d(x,filters,kernel_size,strides=(1,1),padding='same',data_format=
 
 
 
-def inception_module(x,params,padding='same',data_format=DATA_FORMAT,concat_axis,dilation_rate=(1,1),activation='relu',use_bias=True,kernel_initializer='glorot_uniform',bias_initializer='zeros',kernel_regularizer=None,bias_regularizer=None,activity_regularizer=None,kernel_constraint=None,bias_constraint=None,lrn2d_norm=LRN2D_NORM,weight_decay=None):
+def inception_module(x,params,concat_axis,padding='same',data_format=DATA_FORMAT,dilation_rate=(1,1),activation='relu',use_bias=True,kernel_initializer='glorot_uniform',bias_initializer='zeros',kernel_regularizer=None,bias_regularizer=None,activity_regularizer=None,kernel_constraint=None,bias_constraint=None,lrn2d_norm=LRN2D_NORM,weight_decay=None):
     (branch1,branch2,branch3,branch4)=params
     if weight_decay:
         kernel_regularizer=regularizers.l2(weight_decay)
@@ -62,7 +62,7 @@ def inception_module(x,params,padding='same',data_format=DATA_FORMAT,concat_axis
     pathway3=Conv2D(filters=branch3[0],kernel_size=(1,1),strides=1,padding=padding,data_format=data_format,dilation_rate=dilation_rate,activation=activation,use_bias=use_bias,kernel_initializer=kernel_initializer,bias_initializer=bias_initializer,kernel_regularizer=kernel_regularizer,bias_regularizer=bias_regularizer,activity_regularizer=activity_regularizer,kernel_constraint=kernel_constraint,bias_constraint=bias_constraint)(x)
     pathway3=Conv2D(filters=branch3[1],kernel_size=(5,5),strides=1,padding=padding,data_format=data_format,dilation_rate=dilation_rate,activation=activation,use_bias=use_bias,kernel_initializer=kernel_initializer,bias_initializer=bias_initializer,kernel_regularizer=kernel_regularizer,bias_regularizer=bias_regularizer,activity_regularizer=activity_regularizer,kernel_constraint=kernel_constraint,bias_constraint=bias_constraint)(pathway3)
 
-    pathway4=MaxPooling2D(pool_size=(3,3),strides=1,padding='valid',data_format=DATA_FORMAT)(x)
+    pathway4=MaxPooling2D(pool_size=(3,3),strides=1,padding=padding,data_format=DATA_FORMAT)(x)
     pathway4=Conv2D(filters=branch4[0],kernel_size=(1,1),strides=1,padding=padding,data_format=data_format,dilation_rate=dilation_rate,activation=activation,use_bias=use_bias,kernel_initializer=kernel_initializer,bias_initializer=bias_initializer,kernel_regularizer=kernel_regularizer,bias_regularizer=bias_regularizer,activity_regularizer=activity_regularizer,kernel_constraint=kernel_constraint,bias_constraint=bias_constraint)(pathway4)
 
     return concatenate([pathway1,pathway2,pathway3,pathway4],axis=concat_axis)
@@ -82,27 +82,27 @@ def create_model():
         raise Exception('Invalid Dim Ordering: '+str(DIM_ORDERING))
     
     x=conv2D_lrn2d(img_input,64,(7,7),2,padding='same',lrn2d_norm=False)
-    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='same',data_format=DATA_FORMAT)(x)
     x=LRN2D(alpha=ALPHA,beta=BETA)(x)
 
     x=conv2D_lrn2d(x,64,(1,1),1,padding='same',lrn2d_norm=False)
 
     x=conv2D_lrn2d(x,192,(3,3),1,padding='same',lrn2d_norm=True)
-    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='same',data_format=DATA_FORMAT)(x)
     
-    x=inception_module(x,params=[(64,),(96,128),(16,32),(32,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #3a
-    x=inception_module(x,params=[(128,),(128,192),(32,96),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #3b
-    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+    x=inception_module(x,params=[(64,),(96,128),(16,32),(32,)],concat_axis=CONCAT_AXIS) #3a
+    x=inception_module(x,params=[(128,),(128,192),(32,96),(64,)],concat_axis=CONCAT_AXIS) #3b
+    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='same',data_format=DATA_FORMAT)(x)
 
-    x=inception_module(x,params=[(192,),(96,208),(16,48),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4a
-    x=inception_module(x,params=[(160,),(112,224),(24,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4b
-    x=inception_module(x,params=[(128,),(128,256),(24,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4c
-    x=inception_module(x,params=[(112,),(144,288),(32,64),(64,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4d
-    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #4e
-    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='valid',data_format=DATA_FORMAT)(x)
+    x=inception_module(x,params=[(192,),(96,208),(16,48),(64,)],concat_axis=CONCAT_AXIS) #4a
+    x=inception_module(x,params=[(160,),(112,224),(24,64),(64,)],concat_axis=CONCAT_AXIS) #4b
+    x=inception_module(x,params=[(128,),(128,256),(24,64),(64,)],concat_axis=CONCAT_AXIS) #4c
+    x=inception_module(x,params=[(112,),(144,288),(32,64),(64,)],concat_axis=CONCAT_AXIS) #4d
+    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],concat_axis=CONCAT_AXIS) #4e
+    x=MaxPooling2D(pool_size=(3,3),strides=2,padding='same',data_format=DATA_FORMAT)(x)
 
-    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #5a
-    x=inception_module(x,params=[(384,),(192,384),(48,128),(128,)],padding='same',data_format=DATA_FORMAT,axis=CONCAT_AXIS) #5b
+    x=inception_module(x,params=[(256,),(160,320),(32,128),(128,)],concat_axis=CONCAT_AXIS) #5a
+    x=inception_module(x,params=[(384,),(192,384),(48,128),(128,)],concat_axis=CONCAT_AXIS) #5b
     x=AveragePooling2D(pool_size=(7,7),strides=1,padding='valid',data_format=DATA_FORMAT)(x)
 
     x=Flatten()(x)
