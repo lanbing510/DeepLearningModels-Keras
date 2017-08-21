@@ -122,7 +122,7 @@ def check_print():
     model.summary()
 
     # Save a PNG of the Model Build
-    plot_model(model,to_file='VGGNet.png')
+    plot_model(model,to_file='GoogLeNet.png')
     
     model.compile(optimizer='rmsprop',loss='categorical_crossentropy')
     print 'Model Compiled'

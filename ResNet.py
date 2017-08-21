@@ -12,6 +12,7 @@ from keras.layers.merge import add
 from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
+from keras.utils import plot_model
 import six
 
 
